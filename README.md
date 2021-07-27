@@ -14,7 +14,7 @@ For technical details and full experimental results, please check the paper. If 
 ```bibtex
 @InProceedings{zhou2021learning,
   title = 	 {Asymmetric Loss Functions for Learning with Noisy Labels},
-  author =       {Zhou, Xiong and Liu, Xianming and Wang, Chenyang and Deming, Zhai and Jiang, Junjun and Ji, Xiangyang},
+  author =       {Zhou, Xiong and Liu, Xianming and Wang, Chenyang and Zhai, Deming and Jiang, Junjun and Ji, Xiangyang},
   booktitle = 	 {ICCV},
   year = 	 {2021},
 }
