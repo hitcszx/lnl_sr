@@ -39,12 +39,6 @@ gpu_ids = ['1']
 device = 'cuda' if torch.cuda.is_available() and len(gpu_ids) > 0 else 'cpu'
 print('We are using', device)
 
-import random
-random.seed(args.seed)
-np.random.seed(args.seed)
-torch.manual_seed(args.seed)
-torch.cuda.manual_seed(args.seed)
-
 
 seed = 123
 random.seed(seed)
@@ -176,4 +170,4 @@ for criterion, label in zip(criterions, labels):
             if (ep + 1) % freq == 0:
                 lamb = lamb * rho
     save_accs(path, label, accs)
-    print('The validation accuracy is %.2f' % (100 * test_acc))
+    print('The validation accuracy of %s is %.2f' % (label, 100 * test_acc))
