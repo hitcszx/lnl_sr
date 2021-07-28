@@ -15,8 +15,6 @@ from utils import *
 from data.cifar import ImbCIFAR10, ImbCIFAR100
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-from norm import pNorm
-
 
 
 parser = argparse.ArgumentParser(description='Robust loss for learning with noisy labels')
@@ -28,8 +26,8 @@ parser.add_argument('--batch_size', type=int, default=128, help='batch size')
 parser.add_argument('--num_workers', type=int, default=10, help='the number of worker for loading data')
 parser.add_argument('--grad_bound', type=float, default=5., help='the gradient norm bound')
 parser.add_argument('--seed', type=int, default=123)
-parser.add_argument('--imb_type', default="step", type=str, help='imbalance type')
-parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
+parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
+parser.add_argument('--imb_factor', default=0.01, type=float, help='imbalance factor')
 
 args = parser.parse_args()
 
@@ -41,11 +39,11 @@ gpu_ids = ['1']
 device = 'cuda' if torch.cuda.is_available() and len(gpu_ids) > 0 else 'cpu'
 print('We are using', device)
 
-
-if device == 'cuda':
-    torch.cuda.manual_seed(args.seed)
-else:
-    torch.manual_seed(args.seed)
+import random
+random.seed(args.seed)
+np.random.seed(args.seed)
+torch.manual_seed(args.seed)
+torch.cuda.manual_seed(args.seed)
 
 
 seed = 123
@@ -75,25 +73,20 @@ def evaluate(loader, model, softsort=None, vector=None):
     acc = float(correct) / float(total)
     return acc
 
-
-if args.dataset == 'MNIST':
-    in_channels = 1
-    num_classes = 10
-    weight_decay = 1e-3
-    lr = 0.01
-    epochs = 50
-elif args.dataset == 'CIFAR10':
+if args.dataset == 'CIFAR10':
     in_channels = 3
     num_classes = 10
     weight_decay = 1e-4
     lr = 0.01
     epochs=120
+    is_norm = False
 elif args.dataset == 'CIFAR100':
     in_channels = 3
     num_classes = 100
     weight_decay = 1e-5
     lr = 0.1
     epochs=200
+    is_norm = True
 else:
     raise ValueError('Invalid value {}'.format(args.dataset))
 
@@ -136,15 +129,17 @@ if not os.path.exists(path):
 
 times = 1
 
-# criterions = [NCEandMAE(alpha=1, beta=1, num_classes=num_classes), NCEandMAE(alpha=1, beta=1, num_classes=num_classes)]
 criterions = [nn.CrossEntropyLoss()]
-labels = ['CE']
+labels = ['CE+SR']
+
 for criterion, label in zip(criterions, labels):
+    if not label.endswith('+SR'):
+        is_norm = False
     accs = np.zeros((times, epochs))
     for i in range(times):
         tau = 0.5
         p = 0.1
-        lamb = 0.8
+        lamb = 1.1
         rho = 1.03
         freq = 1
         if args.dataset == 'MNIST':
@@ -165,7 +160,8 @@ for criterion, label in zip(criterions, labels):
                 optimizer.zero_grad()
                 out = model(batch_x)
                 if label.endswith('+SR'):
-#                     out = F.normalize(out, dim=1)
+                    if is_norm:
+                        out = F.normalize(out, dim=1)
                     loss = criterion(out / tau, batch_y) + lamb * norm(out / tau)
                 else:
                     loss = criterion(out, batch_y)
@@ -180,3 +176,4 @@ for criterion, label in zip(criterions, labels):
             if (ep + 1) % freq == 0:
                 lamb = lamb * rho
     save_accs(path, label, accs)
+    print('The validation accuracy is %.2f' % (100 * test_acc))
