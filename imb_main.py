@@ -18,7 +18,7 @@ import torchvision.datasets as datasets
 
 
 parser = argparse.ArgumentParser(description='Robust loss for learning with noisy labels')
-parser.add_argument('--dataset', type=str, default="CIFAR10", metavar='DATA', help='Dataset name (default: CIFAR10)')
+parser.add_argument('--dataset', type=str, default="CIFAR100", metavar='DATA', help='Dataset name (default: CIFAR10)')
 parser.add_argument('--root', type=str, default="../database/", help='the data root')
 parser.add_argument('--gpus', type=str, default='1')
 # learning settings
@@ -38,6 +38,7 @@ torch.backends.cudnn.deterministic = True
 gpu_ids = ['1']
 device = 'cuda' if torch.cuda.is_available() and len(gpu_ids) > 0 else 'cpu'
 print('We are using', device)
+
 
 
 seed = 123
@@ -74,6 +75,11 @@ if args.dataset == 'CIFAR10':
     lr = 0.01
     epochs=120
     is_norm = False
+    tau = 0.5
+    p=0.1
+    lamb = 0.8
+    rho = 1.03
+    freq = 1
 elif args.dataset == 'CIFAR100':
     in_channels = 3
     num_classes = 100
@@ -81,6 +87,11 @@ elif args.dataset == 'CIFAR100':
     lr = 0.1
     epochs=200
     is_norm = True
+    tau = 0.5
+    p = 0.01
+    lamb = 0.8
+    rho = 1.02
+    freq = 1
 else:
     raise ValueError('Invalid value {}'.format(args.dataset))
 
@@ -131,11 +142,6 @@ for criterion, label in zip(criterions, labels):
         is_norm = False
     accs = np.zeros((times, epochs))
     for i in range(times):
-        tau = 0.5
-        p = 0.1
-        lamb = 1.1
-        rho = 1.03
-        freq = 1
         if args.dataset == 'MNIST':
             model = CNN(type=args.dataset, show=False, norm=False).to(device)
         elif args.dataset == 'CIFAR10':
@@ -170,4 +176,4 @@ for criterion, label in zip(criterions, labels):
             if (ep + 1) % freq == 0:
                 lamb = lamb * rho
     save_accs(path, label, accs)
-    print('The validation accuracy of %s is %.2f' % (label, 100 * test_acc))
+    print('The validation accuracy is %.2f' % (100 * test_acc))
