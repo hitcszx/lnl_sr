@@ -77,7 +77,7 @@ if args.dataset == 'CIFAR10':
     is_norm = False
     tau = 0.5
     p=0.1
-    lamb = 0.8
+    lamb = 1
     rho = 1.03
     freq = 1
 elif args.dataset == 'CIFAR100':
@@ -89,7 +89,7 @@ elif args.dataset == 'CIFAR100':
     is_norm = True
     tau = 0.5
     p = 0.01
-    lamb = 0.8
+    lamb = 1
     rho = 1.02
     freq = 1
 else:
