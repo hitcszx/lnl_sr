@@ -1,6 +1,6 @@
 # Learning with Noisy Labels via Sparse Regularization
 
-This reposity is the official implementation of [Learning with Noisy Labels via Sparse Regularization].
+This repository is the official implementation of [Learning with Noisy Labels via Sparse Regularization].
 
 ## Requirements
 ```console
