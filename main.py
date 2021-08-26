@@ -131,7 +131,7 @@ elif args.dataset == 'CIFAR100':
     weight_decay = 1e-5
     lr = 0.1
     epochs = 200
-    lamb = 4 if asymm else 10
+    lamb = 10 if asymm else 4
 else:
     raise ValueError('Invalid value {}'.format(args.dataset))
 
