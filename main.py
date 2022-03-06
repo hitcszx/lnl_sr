@@ -112,7 +112,7 @@ data_loader = DatasetGenerator(data_path=os.path.join(args.root, args.dataset),
 data_loader = data_loader.getDataLoader()
 train_loader = data_loader['train_dataset']
 test_loader = data_loader['test_dataset']
-
+tau, p, lamb, rho, freq = get_params_sr(args.dataset, label)
 
 if args.dataset == 'MNIST':
     in_channels = 1
@@ -136,7 +136,6 @@ else:
     raise ValueError('Invalid value {}'.format(args.dataset))
 
 criterion = get_loss_config(args.dataset, train_loader, num_classes=num_classes, loss=args.loss, is_sparse=args.is_sparse)
-tau, p, lamb, rho, freq = get_params_sr(args.dataset, label)
 if args.is_sparse:
     norm = pNorm(p)
 else:
