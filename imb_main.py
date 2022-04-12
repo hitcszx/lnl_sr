@@ -16,6 +16,8 @@ from data.cifar import ImbCIFAR10, ImbCIFAR100
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
+from norm import pNorm
+
 
 parser = argparse.ArgumentParser(description='Robust loss for learning with noisy labels')
 parser.add_argument('--dataset', type=str, default="CIFAR100", metavar='DATA', help='Dataset name (default: CIFAR10)')
